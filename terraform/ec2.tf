@@ -17,8 +17,8 @@ module "ec2_server" {
 
   # Instance Count
   desired_capacity = 1
-  max_size = 5
-  min_size = 1
+  max_size         = 5
+  min_size         = 1
 
   tags = module.tags.tags
 }
