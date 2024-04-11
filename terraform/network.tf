@@ -66,7 +66,7 @@ module "public_route_table" {
 module "private_route_table" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/route-table/aws"
   version = "0.0.1"
-  
+
   count = length(module.private_subnets.subnet_ids)
 
   name   = "${var.name}-${count.index}-private"
@@ -89,7 +89,7 @@ module "internet_gateway" {
   name   = var.name
   vpc_id = module.vpc.vpc_id
 
-  tags   = module.tags.tags
+  tags = module.tags.tags
 }
 
 ########################
