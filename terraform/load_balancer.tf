@@ -3,7 +3,8 @@
 #      Load Balancer     #
 ##########################
 module "load_balancer" {
-  source = "./load-balancer"
+  source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/load-balancer/aws"
+  version = "0.0.1"
 
   name               = var.name
   load_balancer_type = "application"
@@ -30,16 +31,16 @@ module "load_balancer" {
 
   listeners = [
     {
-      port            = 80
-      protocol        = "HTTP"
+      port     = 80
+      protocol = "HTTP"
       default_actions = [{
-        type             = "forward",
+        type = "forward",
         forward = {
           target_groups = [{
-            arn    = module.load_balancer.target_group_arns[0] # Use the first target group for HTTP
+            arn = module.load_balancer.target_group_arns[0] # Use the first target group for HTTP
           }]
         }
-    }]
+      }]
     }
   ]
 
