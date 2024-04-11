@@ -1,21 +1,4 @@
 ########################
-#     EC2 Key Pair     #
-########################
-module "ec2_key_pair" {
-  source  = "terraform-aws-modules/key-pair/aws"
-  version = "2.0.3"
-
-  key_name           = "${var.name}-${var.environment}-key"
-  create_private_key = true
-}
-
-output "ec2_private_key" {
-  description = "The private key of the EC2 key pair"
-  value       = module.ec2_key_pair.private_key_pem
-  sensitive   = true
-}
-
-########################
 #      EC2 Instance    #
 ########################
 module "ec2_server" {
@@ -27,11 +10,15 @@ module "ec2_server" {
   instance_type        = var.ec2_type
   vpc_id               = module.vpc.vpc_id
   security_group_ids   = [module.ec2_server_sg.security_group_id]
-  # vpc_zone_identifiers = module.private_subnets.subnet_ids
-  vpc_zone_identifiers = module.public_subnets.subnet_ids
-  key_name             = module.ec2_key_pair.key_pair_name
+  vpc_zone_identifiers = module.private_subnets.subnet_ids
+  target_group_arns    = module.load_balancer.target_group_arns
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.arn
   user_data            = var.ec2_userdata
+
+  # Instance Count
+  desired_capacity = 1
+  max_size = 5
+  min_size = 1
 
   tags = module.tags.tags
 }
@@ -40,7 +27,7 @@ module "ec2_server" {
 #   EC2 Instance Profile   #
 ############################
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.name}-ec2-instance-profile"
+  name = "${var.name}-ec2-profile"
   role = module.ec2_iam_role.iam_role_name
 }
 
@@ -62,6 +49,15 @@ module "ec2_server_sg" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = []
       description      = "Enable Port 22 SSH access"
+      self             = true
+    },
+    {
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      description      = "Enable Port 80 access (for test)"
       self             = true
     }
   ]

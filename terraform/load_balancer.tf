@@ -18,7 +18,7 @@ module "load_balancer" {
       protocol = "HTTP"
       vpc_id   = module.vpc.vpc_id
       health_check = {
-        path                = "/"
+        path                = "/it"
         interval            = 30
         timeout             = 5
         healthy_threshold   = 5
@@ -32,8 +32,14 @@ module "load_balancer" {
     {
       port            = 80
       protocol        = "HTTP"
-      ssl_policy      = ""
-      certificate_arn = ""
+      default_actions = [{
+        type             = "forward",
+        forward = {
+          target_groups = [{
+            arn    = module.load_balancer.target_group_arns[0] # Use the first target group for HTTP
+          }]
+        }
+    }]
     }
   ]
 
