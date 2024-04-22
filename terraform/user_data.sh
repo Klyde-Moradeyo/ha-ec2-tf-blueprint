@@ -2,15 +2,23 @@
 
 set -e 
 
+# Set Env Vars
 export WORKING_DIR="${WORKING_DIR}"
-echo "WORKING_DIR=${WORKING_DIR}" > /etc/environment
-echo "${WORKING_DIR}"
-mkdir -p "${WORKING_DIR}"
-
 export RDS_HOST="${RDS_HOST}"
-echo "RDS_HOST=${RDS_HOST}" > /etc/environment
-echo "${RDS_HOST}" > "${WORKING_DIR}/rds_host.txt"
+export DB_USERNAME="${DB_USERNAME}"
+export DB_PASSWORD="${DB_PASSWORD}"
+export RAILS_ENV="${RAILS_ENV}"
 
+echo "WORKING_DIR=${WORKING_DIR}" > /etc/environment
+echo "DB_HOST=${DB_HOST}" > /etc/environment
+echo "DB_USERNAME=${DB_USERNAME}" > /etc/environment
+echo "DB_PASSWORD=${DB_PASSWORD}" > /etc/environment
+echo "RAILS_ENV=${RAILS_ENV}" > /etc/environment
+
+GIT_URL="https://github.com/Klyde-Moradeyo/election-web-app.git"
+GIT_BRANCH="aws-ha-ec2-tf-blueprint"
+
+# Install Dependencies
 retry_command() {
     local max_attempts=15 
     local attempt=0
@@ -38,8 +46,8 @@ retry_command "sudo yum install -y lsof ca-certificates curl gnupg2 unzip zip bc
 
 # Ensure git is available
 until git --version 2>/dev/null; do
-echo "Waiting for git to become available..."
-sleep 2
+    echo "Waiting for git to become available..."
+    sleep 2
 done 
 
 # Install Docker
@@ -55,22 +63,30 @@ export PATH="/usr/local/bin:$PATH"
 
 sleep 5
 
-# Clone the repository
-git clone https://github.com/Klyde-Moradeyo/election-web-app.git $WORKING_DIR/election-web-app
+# Prepare Application
+APP_DIR="{$WORKING_DIR}/election-web-app"
+mkdir -p "${WORKING_DIR}"
 
+# Clone the repository
+git clone -b $GIT_BRANCH --single-branch $GIT_URL $APP_DIR
+
+# Generate Election Web App env file
 echo "Creating .env file..."
 {
     echo "DB_HOST=$DB_HOST"
     echo "DB_USERNAME=$DB_USERNAME"
     echo "DB_PASSWORD=$DB_PASSWORD"
-} > $WORKING_DIR/election-web-app/.env
+    echo "RAILS_LOG_TO_STDOUT=true"
+    echo "RAILS_ENV=production"
+} > $APP_DIR/.env
 
 echo ".env file created successfully."
 
 # Start APP
-cd $WORKING_DIR/election-web-app && sudo docker-compose up --build  
+cd $APP_DIR && sudo docker-compose up -d 
 
-echo "finished"
+echo "Started Election Web App Containers"
+echo "SUCCESS"
 
 
 
