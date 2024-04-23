@@ -10,7 +10,7 @@ module "rds_instance" {
   password                  = var.rds_password
   subnet_ids                = module.db_private_subnets.subnet_ids
   vpc_security_group_ids    = [ module.rds_sg.security_group_id ]
-  multi_az                  = false # true
+  multi_az                  = true
   storage_encrypted         = true
 
   tags = module.tags.tags
