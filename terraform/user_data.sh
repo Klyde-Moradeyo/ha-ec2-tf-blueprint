@@ -4,16 +4,16 @@ set -e
 
 # Set Env Vars
 export WORKING_DIR="${WORKING_DIR}"
-export RDS_HOST="${RDS_HOST}"
+export DB_HOST="${DB_HOST}"
 export DB_USERNAME="${DB_USERNAME}"
 export DB_PASSWORD="${DB_PASSWORD}"
-export RAILS_ENV="${RAILS_ENV}"
 
-echo "WORKING_DIR=${WORKING_DIR}" > /etc/environment
-echo "DB_HOST=${DB_HOST}" > /etc/environment
-echo "DB_USERNAME=${DB_USERNAME}" > /etc/environment
-echo "DB_PASSWORD=${DB_PASSWORD}" > /etc/environment
-echo "RAILS_ENV=${RAILS_ENV}" > /etc/environment
+{
+    echo "WORKING_DIR=${WORKING_DIR}"
+    echo "DB_HOST=${DB_HOST}"
+    echo "DB_USERNAME=${DB_USERNAME}"
+    echo "DB_PASSWORD=${DB_PASSWORD}"
+} > /etc/environment
 
 GIT_URL="https://github.com/Klyde-Moradeyo/election-web-app.git"
 GIT_BRANCH="aws-ha-ec2-tf-blueprint"
@@ -64,7 +64,7 @@ export PATH="/usr/local/bin:$PATH"
 sleep 5
 
 # Prepare Application
-APP_DIR="{$WORKING_DIR}/election-web-app"
+APP_DIR="${WORKING_DIR}/election-web-app"
 mkdir -p "${WORKING_DIR}"
 
 # Clone the repository
