@@ -10,8 +10,7 @@ module "ec2_server" {
   instance_type        = var.ec2_type
   vpc_id               = module.vpc.vpc_id
   security_group_ids   = [module.ec2_server_sg.security_group_id]
-  # vpc_zone_identifiers = module.web_private_subnets.subnet_ids
-  vpc_zone_identifiers = module.public_subnets.subnet_ids
+  vpc_zone_identifiers = module.web_private_subnets.subnet_ids
   target_group_arns    = module.load_balancer.target_group_arns
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.arn
   user_data            = templatefile("${path.module}/user_data.sh", {
