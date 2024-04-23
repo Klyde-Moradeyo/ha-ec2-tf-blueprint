@@ -97,8 +97,9 @@ module "private_route_table" {
 #   Internet Gateway   #
 ########################
 module "internet_gateway" {
-  source = "git@github.com:Klyde-Moradeyo/terraform-modules.git//modules/aws/internet-gateway?ref=dev"
-
+  source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/internet-gateway/aws"
+  version = "0.0.1"
+  
   name   = var.name
   vpc_id = module.vpc.vpc_id
 
