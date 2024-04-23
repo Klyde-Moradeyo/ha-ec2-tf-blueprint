@@ -76,32 +76,32 @@ variable "ec2_working_dir" {
 ##########################
 #          RDS           #
 ##########################
-variable "instance_class" {
+variable "rds_instance_class" {
   description = "The instance type of the RDS instance"
   type        = string
 }
 
-variable "allocated_storage" {
+variable "rds_allocated_storage" {
   description = "The allocated storage in gibibytes"
   type        = number
 }
 
-variable "engine" {
+variable "rds_engine" {
   description = "The database engine to use"
   type        = string
 }
 
-variable "engine_version" {
+variable "rds_engine_version" {
   description = "The engine version to use"
   type        = string
 }
 
-variable "username" {
+variable "rds_username" {
   description = "Username for the RDS database"
   type        = string
 }
 
-variable "password" {
+variable "rds_password" {
   description = "Password for the RDS database"
   type        = string
   sensitive   = true

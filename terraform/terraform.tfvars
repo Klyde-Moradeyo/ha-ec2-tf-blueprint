@@ -33,15 +33,15 @@ db_private_subnet_cidrs = [
 
 # EC2
 ec2_ami      = "ami-004961349a19d7a8f"
-ec2_type     = "t2.medium"
+ec2_type     = "t2.micro"
 ec2_user_data_script_path = "./user_data.sh"
 ec2_working_dir = "/home/ec2-user/server"
 
 # RDS
-instance_class = "db.m5d.large"
-allocated_storage = 20
-engine = "postgres"
-engine_version = "16.1"
-username = "test"
-password = "yourStrong(!)Password"
+rds_instance_class = "db.m5d.large"
+rds_allocated_storage = 20
+rds_engine = "postgres"
+rds_engine_version = "16.1"
+rds_username = "test"
+rds_password = "yourStrong(!)Password"
 
