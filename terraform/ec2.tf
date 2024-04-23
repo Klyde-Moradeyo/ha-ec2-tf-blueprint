@@ -17,10 +17,13 @@ module "ec2_server" {
   user_data            = templatefile("${path.module}/user_data.sh", {
     RDS_HOST = module.rds_instance.db_instance_address
     WORKING_DIR = var.ec2_working_dir
+    DB_HOST = module.rds_instance.db_instance_address
+    DB_USERNAME = var.rds_username
+    DB_PASSWORD = var.rds_password
   })
 
   # Instance Count
-  desired_capacity = 1
+  desired_capacity = 3
   max_size         = 5
   min_size         = 1
 
