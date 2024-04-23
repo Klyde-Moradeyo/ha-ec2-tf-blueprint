@@ -26,6 +26,7 @@ resource "aws_db_instance" "db" {
   multi_az                = var.multi_az
   storage_encrypted       = var.storage_encrypted
   backup_retention_period = var.backup_retention_period
+  skip_final_snapshot  = var.skip_final_snapshot
   tags                    = var.tags
 }
 

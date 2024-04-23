@@ -64,6 +64,12 @@ variable "db_parameters" {
   default     = {}
 }
 
+variable "skip_final_snapshot" {
+  description = "Determines whether a final snapshot is taken before the database is deleted."
+  type        = bool
+  default     = false
+}
+
 ########################
 #         Tags         #
 ########################
