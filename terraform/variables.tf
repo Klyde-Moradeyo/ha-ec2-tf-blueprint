@@ -62,10 +62,49 @@ variable "ec2_type" {
   type        = string
 }
 
-variable "ec2_userdata" {
-  description = "EC2 User Data"
+variable "ec2_user_data_script_path" {
   type        = string
-  default     = ""
+  description = "Path to the user data script"
+}
+
+variable "ec2_working_dir" {
+  type        = string
+  description = "The working directory on the EC2 instance"
+}
+
+
+##########################
+#          RDS           #
+##########################
+variable "rds_instance_class" {
+  description = "The instance type of the RDS instance"
+  type        = string
+}
+
+variable "rds_allocated_storage" {
+  description = "The allocated storage in gibibytes"
+  type        = number
+}
+
+variable "rds_engine" {
+  description = "The database engine to use"
+  type        = string
+}
+
+variable "rds_engine_version" {
+  description = "The engine version to use"
+  type        = string
+}
+
+variable "rds_username" {
+  description = "Username for the RDS database"
+  type        = string
+}
+
+variable "rds_password" {
+  description = "Password for the RDS database"
+  type        = string
+  sensitive   = true
 }
 
 ########################
@@ -94,8 +133,13 @@ variable "public_subnet_cidrs" {
   type        = list(string)
 }
 
-variable "private_subnet_cidrs" {
-  description = "The CIDR block for the private Subnet."
+variable "web_private_subnet_cidrs" {
+  description = "The CIDR block for the web server private Subnet."
+  type        = list(string)
+}
+
+variable "db_private_subnet_cidrs" {
+  description = "The CIDR block for the database private Subnet."
   type        = list(string)
 }
 
