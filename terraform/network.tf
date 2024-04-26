@@ -15,17 +15,30 @@ module "vpc" {
 #        Subnets       #
 ########################
 locals {
-  public_subnets  = { for i, az in data.aws_availability_zones.available.names : az => element(var.public_subnet_cidrs, i) }
-  private_subnets = { for i, az in data.aws_availability_zones.available.names : az => element(var.private_subnet_cidrs, i) }
+  public_subnets      = { for i, az in data.aws_availability_zones.available.names : az => element(var.public_subnet_cidrs, i) }
+  web_private_subnets = { for i, az in data.aws_availability_zones.available.names : az => element(var.web_private_subnet_cidrs, i) }
+  db_private_subnets  = { for i, az in data.aws_availability_zones.available.names : az => element(var.db_private_subnet_cidrs, i) }
 }
 
-module "private_subnets" {
+module "web_private_subnets" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/subnet/aws"
   version = "0.0.1"
 
-  name                    = "${var.name}-private"
+  name                    = "${var.name}-web-private"
   vpc_id                  = module.vpc.vpc_id
-  subnets                 = local.private_subnets
+  subnets                 = local.web_private_subnets
+  map_public_ip_on_launch = false
+
+  tags = module.tags.tags
+}
+
+module "db_private_subnets" {
+  source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/subnet/aws"
+  version = "0.0.1"
+
+  name                    = "${var.name}-db-private"
+  vpc_id                  = module.vpc.vpc_id
+  subnets                 = local.db_private_subnets
   map_public_ip_on_launch = false
 
   tags = module.tags.tags
@@ -67,7 +80,7 @@ module "private_route_table" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/route-table/aws"
   version = "0.0.1"
 
-  count = length(module.private_subnets.subnet_ids)
+  count = length(module.web_private_subnets.subnet_ids)
 
   name   = "${var.name}-${count.index}-private"
   vpc_id = module.vpc.vpc_id
@@ -75,7 +88,7 @@ module "private_route_table" {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = module.nat_gateway[count.index].nat_gateway_id
   }]
-  subnets = [module.private_subnets.subnet_ids[count.index]]
+  subnets = [module.web_private_subnets.subnet_ids[count.index]]
 
   tags = module.tags.tags
 }
@@ -84,8 +97,9 @@ module "private_route_table" {
 #   Internet Gateway   #
 ########################
 module "internet_gateway" {
-  source = "git@github.com:Klyde-Moradeyo/terraform-modules.git//modules/aws/internet-gateway?ref=dev"
-
+  source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/internet-gateway/aws"
+  version = "0.0.1"
+  
   name   = var.name
   vpc_id = module.vpc.vpc_id
 

@@ -10,13 +10,19 @@ module "ec2_server" {
   instance_type        = var.ec2_type
   vpc_id               = module.vpc.vpc_id
   security_group_ids   = [module.ec2_server_sg.security_group_id]
-  vpc_zone_identifiers = module.private_subnets.subnet_ids
+  vpc_zone_identifiers = module.web_private_subnets.subnet_ids
   target_group_arns    = module.load_balancer.target_group_arns
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.arn
-  user_data            = var.ec2_userdata
+  user_data            = templatefile("${path.module}/user_data.sh", {
+    RDS_HOST = module.rds_instance.db_instance_address
+    WORKING_DIR = var.ec2_working_dir
+    DB_HOST = module.rds_instance.db_instance_address
+    DB_USERNAME = var.rds_username
+    DB_PASSWORD = var.rds_password
+  })
 
   # Instance Count
-  desired_capacity = 1
+  desired_capacity = 3
   max_size         = 5
   min_size         = 1
 
