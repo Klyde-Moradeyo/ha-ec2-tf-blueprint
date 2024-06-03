@@ -12,16 +12,9 @@ module "resource_name_prefix" {
 ##########################
 #   Launch Template      #
 ##########################
-locals {
-  instance_type_to_ami_map = merge(
-    var.instance_type_to_ami_map, 
-    { "${var.default_instance_type}" = var.default_ami }
-  )
-}
-
 resource "aws_launch_template" "ec2_lt" {
   name_prefix   = "${module.resource_name_prefix.resource_name}-lt"
-  image_id      = lookup(local.instance_type_to_ami_map, var.default_instance_type, var.default_ami)
+  image_id      = var.instance_types_config[var.default_instance_type].ami
   instance_type = var.default_instance_type
   key_name      = var.key_name
 
@@ -55,11 +48,11 @@ resource "aws_autoscaling_group" "ec2_asg" {
 
   mixed_instances_policy {
     instances_distribution {
-      on_demand_base_capacity                = try(var.spot_configuration.on_demand_base_capacity, 0)
-      on_demand_percentage_above_base_capacity = try(var.spot_configuration.on_demand_percentage_above_base_capacity, 100)
-      spot_allocation_strategy               = try(var.spot_configuration.allocation_strategy, "lowest-price")
-      spot_instance_pools                    = try(var.spot_configuration.instance_pools, 2)
-      spot_max_price                         = try(var.spot_configuration.max_price, null)
+      on_demand_base_capacity                = var.spot_configuration.enabled ? var.spot_configuration.on_demand_base_capacity : var.desired_capacity
+      on_demand_percentage_above_base_capacity = var.spot_configuration.enabled ? var.spot_configuration.on_demand_percentage_above_base_capacity : 100
+      spot_allocation_strategy               = var.spot_configuration.enabled ? var.spot_configuration.allocation_strategy : null
+      spot_instance_pools                    = var.spot_configuration.enabled ? var.spot_configuration.instance_pools : null
+      spot_max_price                         = var.spot_configuration.enabled ? var.spot_configuration.max_price : null                    
     }
 
     launch_template {
@@ -70,14 +63,14 @@ resource "aws_autoscaling_group" "ec2_asg" {
 
       override {
         instance_type     = var.default_instance_type
-        weighted_capacity = lookup(var.weighted_capacity_overrides, var.default_instance_type, 1)
+        weighted_capacity = var.instance_types_config[var.default_instance_type].weighted_capacity
       }
 
       dynamic "override" {
         for_each = var.instance_type_overrides
         content {
           instance_type     = override.value
-          weighted_capacity = lookup(var.weighted_capacity_overrides, override.value, 1)  // Default capacity to 1 if not specified
+          weighted_capacity = var.instance_types_config[override.value].weighted_capacity
         }
       }
     }
@@ -98,3 +91,4 @@ resource "aws_autoscaling_group" "ec2_asg" {
     }
   }
 }
+

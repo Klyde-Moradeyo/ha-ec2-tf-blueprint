@@ -1,6 +1,6 @@
 module "rds_instance" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/rds/aws"
-  version = "0.0.1"
+  version = "0.0.2"
 
   name                      = var.name
   instance_class            = var.rds_instance_class

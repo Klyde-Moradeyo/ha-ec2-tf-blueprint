@@ -32,8 +32,9 @@ db_private_subnet_cidrs = [
 ]
 
 # EC2
-ec2_ami      = "ami-004961349a19d7a8f"
 ec2_type     = "t2.small"
+ec2_arm_ami =  "ami-03283c89758a063e7"
+ec2_intel_ami = "ami-01980876755d1e5ac"
 ec2_user_data_script_path = "./user_data.sh"
 ec2_working_dir = "/home/ec2-user/server"
 

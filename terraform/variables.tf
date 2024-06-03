@@ -52,8 +52,13 @@ variable "environment" {
 ########################
 #          EC2         #
 ########################
-variable "ec2_ami" {
-  description = "EC2 AMI"
+variable "ec2_arm_ami" {
+  description = "EC2 ARM AMI"
+  type        = string
+}
+
+variable "ec2_intel_ami" {
+  description = "EC2 ARM AMI"
   type        = string
 }
 
