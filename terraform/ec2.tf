@@ -19,64 +19,62 @@ output "ec2_key_pair" {
 ########################
 locals {
   instance_type_to_ami_map = {
-    "${var.ec2_type}" = { ami = var.ec2_arm_ami, weighted_capacity = 1 } # default ec2-instnace
-    "t2.small"   = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
-    "t3.small"   = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
-    "t4g.medium" = { ami = var.ec2_arm_ami, weighted_capacity = 1 },
-    "c6g.medium" = { ami = var.ec2_arm_ami, weighted_capacity = 1 },
-    "t3a.medium" = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
+    "${var.ec2_type}" = { ami = var.ec2_intel_ami, weighted_capacity = 1 } # default ec2-instnace
+    "t3.small"        = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
+    "t4g.medium"      = { ami = var.ec2_arm_ami, weighted_capacity = 1 },
+    "c6g.medium"      = { ami = var.ec2_arm_ami, weighted_capacity = 1 },
+    "t3a.medium"      = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
   }
 }
 module "ec2_server" {
-  # source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/ec2-autoscale/aws"
-  # version = "0.0.1"
-  source = "./ec2-autoscale"
+  source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/ec2-autoscale/aws"
+  version = "0.0.3"
 
-  name                 = var.name
+  name = var.name
 
   # EC2 Configuration
-  default_instance_type        = var.ec2_type
-  key_name = module.ec2_key_pair.key_pair_name
-  detailed_monitoring = false
-  user_data            = templatefile(var.ec2_user_data_script_path, {
-    RDS_HOST = module.rds_instance.db_instance_address
+  default_instance_type = var.ec2_type
+  key_name              = module.ec2_key_pair.key_pair_name
+  detailed_monitoring   = false
+  user_data = templatefile(var.ec2_user_data_script_path, {
+    RDS_HOST    = module.rds_instance.db_instance_address
     WORKING_DIR = var.ec2_working_dir
-    DB_HOST = module.rds_instance.db_instance_address
+    DB_HOST     = module.rds_instance.db_instance_address
     DB_USERNAME = var.rds_username
     DB_PASSWORD = var.rds_password
   })
 
   # ASG sizing
   desired_capacity = 3
-  min_size = 1
-  max_size = 5
+  min_size         = 1
+  max_size         = 5
 
   # Spot instance configuration
   spot_configuration = {
-    enabled = true
-    on_demand_base_capacity = 0 # 1
+    enabled                                  = true
+    on_demand_base_capacity                  = 0 # 1
     on_demand_percentage_above_base_capacity = 0 # 20
-    allocation_strategy = "lowest-price"
-    max_price = 0.02 # Max price in USD per hour per instance
-    instance_pools = length(keys(local.instance_type_to_ami_map))
+    allocation_strategy                      = "lowest-price"
+    max_price                                = 0.02 # Max price in USD per hour per instance
+    instance_pools                           = length(keys(local.instance_type_to_ami_map))
   }
 
   # Dynamic
   instance_types_config = local.instance_type_to_ami_map
 
   # Instance type overrides for mixed ASG policy
-  instance_type_overrides = [    
-    "t2.small", 
-    "t3.small", 
-    "t4g.medium", 
+  instance_type_overrides = [
+    "t2.small",
+    "t3.small",
+    "t4g.medium",
     "c6g.medium",
-    "t3a.medium" 
-    ]
+    "t3a.medium"
+  ]
 
   # Network
   vpc_id               = module.vpc.vpc_id
   vpc_zone_identifiers = module.web_private_subnets.subnet_ids
-  security_group_ids   = [
+  security_group_ids = [
     module.ec2_server_sg.security_group_id,
   ]
 
@@ -84,7 +82,7 @@ module "ec2_server" {
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.arn
 
   # Load Balancer
-  target_group_arns    = module.load_balancer.target_group_arns
+  target_group_arns = module.load_balancer.target_group_arns
 
   tags = module.tags.tags
 }

@@ -99,7 +99,7 @@ module "private_route_table" {
 module "internet_gateway" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/internet-gateway/aws"
   version = "0.0.1"
-  
+
   name   = var.name
   vpc_id = module.vpc.vpc_id
 

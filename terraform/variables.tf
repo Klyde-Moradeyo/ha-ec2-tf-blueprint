@@ -112,6 +112,12 @@ variable "rds_password" {
   sensitive   = true
 }
 
+variable "rds_multi_az" {
+  description = "RDS database mutliaz"
+  type        = string
+  sensitive   = true
+}
+
 ########################
 #   Security Groups    #
 ########################
