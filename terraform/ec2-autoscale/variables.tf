@@ -22,12 +22,12 @@ variable "security_group_ids" {
 ########################
 #   EC2 Configuration  #
 ########################
-variable "ami" {
-  description = "AMI for the EC2 instance"
+variable "default_ami" {
+  description = "Default AMI for the EC2 instance"
   type        = string
 }
 
-variable "instance_type" {
+variable "default_instance_type" {
   description = "Type of the EC2 instance"
   type        = string
 }
@@ -100,22 +100,32 @@ variable "tags" {
 #    Spot Instances    #
 ########################
 variable "spot_configuration" {
-  description = "Configuration options for Spot Instances within the ASG. If not set, the ASG will default to On-Demand Instances."
+  description = "Configuration options for Spot Instances within the Auto Scaling Group. Determines if Spot Instances are enabled and details their configuration."
   type = object({
-    enabled                       = bool
-    on_demand_base_capacity       = number
-    on_demand_percentage_above_base_capacity = number
-    allocation_strategy           = string
-    instance_pools                = number
+    enabled                       = bool                   # Whether Spot Instances are enabled
+    max_price                     = number                 # Maximum price per hour you are willing to pay per Spot Instance (optional)
+    spot_instance_type            = optional(string)       # Type of Spot Instance request (e.g., one-time or persistent), defaults to 'one-time'
+    valid_until                   = optional(string)       # The end time of the Spot Instance request (optional)
+    instance_interruption_behavior= optional(string)       # Behavior when a Spot Instance is interrupted (e.g., stop, terminate, hibernate), defaults to 'terminate'
+    on_demand_base_capacity       = optional(number)       # The baseline number of On-Demand Instances in the group, defaults to 0
+    on_demand_percentage_above_base_capacity = optional(number) # Controls the percentage of On-Demand Instances above the base capacity, defaults to 100
+    allocation_strategy           = optional(string)       # How to allocate capacity across the Spot Instance pools, defaults to 'lowest-price'
+    instance_pools                = optional(number)       # The number of instance pools to use for fulfilling Spot requests, defaults to 2
   })
   default = {
     enabled                       = false
+    max_price                     = null
+    spot_instance_type            = "one-time"
+    valid_until                   = null
+    instance_interruption_behavior= "terminate"
     on_demand_base_capacity       = 0
     on_demand_percentage_above_base_capacity = 100
     allocation_strategy           = "lowest-price"
     instance_pools                = 2
   }
 }
+
+
 
 variable "instance_type_to_ami_map" {
   description = "Map of instance types to AMIs for dynamic AMI selection"
