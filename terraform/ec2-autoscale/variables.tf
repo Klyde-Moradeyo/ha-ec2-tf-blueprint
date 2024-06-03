@@ -68,13 +68,13 @@ variable "min_size" {
 variable "max_size" {
   description = "Maximum size of the Auto Scaling Group"
   type        = number
-  default     = 1
+  default     = 3
 }
 
 variable "desired_capacity" {
   description = "Desired capacity of the Auto Scaling Group"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "vpc_zone_identifiers" {
@@ -94,4 +94,46 @@ variable "target_group_arns" {
 variable "tags" {
   description = "Tags to assign"
   type        = map(string)
+}
+
+########################
+#    Spot Instances    #
+########################
+variable "spot_configuration" {
+  description = "Configuration options for Spot Instances within the ASG. If not set, the ASG will default to On-Demand Instances."
+  type = object({
+    enabled                       = bool
+    on_demand_base_capacity       = number
+    on_demand_percentage_above_base_capacity = number
+    allocation_strategy           = string
+    instance_pools                = number
+  })
+  default = {
+    enabled                       = false
+    on_demand_base_capacity       = 0
+    on_demand_percentage_above_base_capacity = 100
+    allocation_strategy           = "lowest-price"
+    instance_pools                = 2
+  }
+}
+
+variable "instance_type_to_ami_map" {
+  description = "Map of instance types to AMIs for dynamic AMI selection"
+  type        = map(string)
+  default     = {}
+}
+
+variable "instance_type_overrides" {
+  description = "List of additional instance types that the ASG can launch. Useful for diversifying the instances to optimize cost and availability."
+  type        = list(string)
+  default     = []
+}
+
+variable "weighted_capacity_overrides" {
+  description = "Map of additional instance types to their weighted capacities to balance capacity across multiple instance types. Weights determine the proportion of each instance type that contributes to the desired capacity of the Auto Scaling Group."
+  type        = map(number)
+  default     = {
+    "t3.micro"   = 1,
+    "t3.small"   = 2
+  }
 }
