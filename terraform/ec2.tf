@@ -26,9 +26,10 @@ locals {
     "t3a.medium"      = { ami = var.ec2_intel_ami, weighted_capacity = 1 },
   }
 }
+
 module "ec2_server" {
   source  = "km-tf-registry.onrender.com/klyde-moradeyo__dev-generic-tf-modules/ec2-autoscale/aws"
-  version = "0.0.3"
+  version = "0.0.6"
 
   name = var.name
 
@@ -63,13 +64,7 @@ module "ec2_server" {
   instance_types_config = local.instance_type_to_ami_map
 
   # Instance type overrides for mixed ASG policy
-  instance_type_overrides = [
-    "t2.small",
-    "t3.small",
-    "t4g.medium",
-    "c6g.medium",
-    "t3a.medium"
-  ]
+  instance_type_overrides = keys(local.instance_type_to_ami_map)
 
   # Network
   vpc_id               = module.vpc.vpc_id
@@ -78,21 +73,10 @@ module "ec2_server" {
     module.ec2_server_sg.security_group_id,
   ]
 
-  # Iam Profile
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.arn
-
   # Load Balancer
   target_group_arns = module.load_balancer.target_group_arns
 
   tags = module.tags.tags
-}
-
-############################
-#   EC2 Instance Profile   #
-############################
-resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.name}-ec2-profile"
-  role = module.ec2_iam_role.iam_role_name
 }
 
 #######################

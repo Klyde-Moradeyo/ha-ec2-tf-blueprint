@@ -7,6 +7,7 @@ module "ec2_iam_role" {
   version = "0.0.1"
 
   name = var.name
+  path = "/ec2-instance/"
 
   trust_policy_hcl = {
     Version = "2012-10-17"
@@ -17,7 +18,7 @@ module "ec2_iam_role" {
         Principal = {
           Service = "ec2.amazonaws.com"
         }
-      },
+      }
     ]
   }
 
